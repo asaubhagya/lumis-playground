@@ -1,6 +1,6 @@
-# Pip’s Playground — Lumi’s classroom
+# Lumi’s Playground
 
-A full-screen science classroom for ages 5–10. Two experiences: Light & Shadows (four discoveries) and Forces & Motion (three discoveries). Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
+A desktop-first full-screen science classroom for ages 5–10. Two experiences: Light & Shadows (four discoveries) and Forces & Motion (three discoveries). Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
 
 ## Play
 
@@ -26,3 +26,5 @@ Microphone and camera require browser permission. Leaving the classroom stops tr
 `node --test tests/*.test.mjs` validates stream handling, progression and physics relationships, including controlled motion comparisons. `./node_modules/.bin/tsc --noEmit` checks types. Build with the Sites hosting helper.
 
 Official API contracts: https://developers.openai.com/api/docs/guides/live-delegation and https://developers.openai.com/api/docs/guides/agents-api/quickstart.
+
+Desktop refinement: entering attempts Live voice automatically. A connected session persists across discoveries and sends bounded proactive observation requests after completed experiments. Pointer light, ambient dust, gaze tracking, arrow-key shadow controls (last selected toy), and Space to push complement dragging. Reduced motion disables atmosphere movement. Offline status is explicit.
