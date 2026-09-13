@@ -22,3 +22,20 @@
 @keyframes lumi-awakens{0%{opacity:0;transform:translateY(12px) scale(.78);filter:drop-shadow(0 0 0 #c0e4c900)}55%{opacity:1;transform:translateY(-3px) scale(1.08);filter:drop-shadow(0 0 20px #c0e4c966)}100%{opacity:1;transform:translateY(0) scale(1);filter:drop-shadow(0 0 4px #c0e4c918)}}
 @keyframes lumi-wake-eyes{0%,25%{transform:scaleY(.08)}60%,100%{transform:scaleY(1)}}
 @keyframes lumi-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+/* A quiet writing surface, present only when Lumi has something to draw. */
+.teaching-board{position:absolute;z-index:9;left:4vw;top:105px;width:min(390px,29vw);padding:22px 26px 24px;color:#d4e7d9;background:linear-gradient(145deg,rgba(24,47,44,.94),rgba(17,36,34,.93));border:1px solid #b8d8c21c;border-radius:9px;box-shadow:0 18px 65px #0003,inset 0 0 45px #c5e4bc03;transform:rotate(-.7deg);animation:board-arrive .65s ease both;font-family:'Chalkboard SE','Chalkboard','Comic Sans MS',cursive;}
+.board-title{font:inherit;font-size:24px;line-height:1.2;margin:0 20px 7px 0;color:#e0ece0;animation:chalk-words 1.2s steps(20,end) both;}
+.teaching-board svg{width:100%;height:auto;overflow:visible;opacity:.9;}
+.board-note{font:inherit;font-size:20px;line-height:1.45;margin:8px 0 0;animation:chalk-words 1.4s steps(28,end) .9s both;}
+.board-close{position:absolute;right:10px;top:10px;display:grid;place-items:center;width:28px;height:28px;border:0;background:none;color:#a3b7ac;cursor:pointer;opacity:.65;}
+.board-close:hover{opacity:1;}
+.chalk-lines path,.chalk-lines circle{stroke-dasharray:1;stroke-dashoffset:1;animation:chalk-draw 1.55s ease .2s forwards;}
+.chalk-lines path:nth-child(n+4){animation-delay:.55s;}
+.chalk-labels{font-family:inherit;animation:chalk-words .8s ease 1s both;}
+.chalk-shadow{fill:#c9dfc708;}
+.chalk-rest{position:absolute;bottom:-3px;right:27px;width:29px;height:5px;background:#d3dbcd;border-radius:2px;transform:rotate(-3deg);box-shadow:0 2px 5px #0005;}
+@keyframes chalk-draw{to{stroke-dashoffset:0}}
+@keyframes chalk-words{from{clip-path:inset(0 100% 0 0);opacity:.2}to{clip-path:inset(0);opacity:1}}
+@keyframes board-arrive{from{opacity:0;transform:translateY(10px) rotate(-.7deg)}to{opacity:1;transform:translateY(0) rotate(-.7deg)}}
+@media(prefers-reduced-motion:reduce){.teaching-board,.board-title,.board-note,.chalk-labels,.chalk-lines path,.chalk-lines circle{animation:none;stroke-dashoffset:0;}}

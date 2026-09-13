@@ -1,6 +1,6 @@
 # Lumi’s Playground
 
-A desktop-first full-screen science classroom for ages 5–10. Two experiences: Light & Shadows (four discoveries) and Forces & Motion (three discoveries). Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
+A desktop-first full-screen science classroom for ages 5–7. The demo is Light & Shadows (four discoveries). Forces & Motion remains in source for future exploration. Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
 
 ## Play
 
@@ -10,14 +10,14 @@ Motion compares fixed-duration pushes, mass, and surface friction. Each stage re
 
 ## AI and media
 
-- GPT Live (`gpt-live-1`): WebRTC microphone and audio; client delegation routes teaching to the Agents API. Experiment state is sent as quiet `session.thinking.append` updates with `delegation_id:null`. Spoken results use `session.commentary.append` with the delegation ID.
+- GPT Live (`gpt-live-1`): WebRTC microphone and audio; client delegation routes teaching to the server reasoning backend. Experiment state is sent as quiet `session.thinking.append` updates with `delegation_id:null`. Spoken results use `session.commentary.append` with the delegation ID.
 - Agents API (`gpt-6-astra`): `/api/teacher` reasons over state, trial evidence and conversation. It can request one bounded control change when the learner asks for help or a demonstration. The client validates controls; the teacher cannot grade or advance. This is application tool control, not general operating-system computer use.
-- Astra vision: student can share an experiment SVG snapshot or a reviewed camera photo. GPT Live does not accept images directly; the vision backend returns observations. Camera preview stays local until Share with Lumi. No inference of emotion, attention or thoughts from faces.
+- Vision (`gpt-5.4-mini`): student can share an experiment SVG snapshot or a reviewed camera photo. GPT Live does not accept images directly; the vision backend returns observations. Camera preview stays local until Share with Lumi. No inference of emotion, attention or thoughts from faces.
 - Image API (`gpt-image-2.5-flare`): optional decorative discovery artwork after completion. It does not generate the physics simulation.
 - Device read-aloud is separately labelled and is not GPT Live.
 - WebMCP tools expose visible classroom state and bounded controls for compatible browsers.
 
-API secrets are server-only in ignored `.dev.vars` locally and Sites runtime secrets when configured. The existing key still returns `404 model_not_found` for Astra; real Live voice did not connect during this iteration. Sites has no entitled runtime key configured. Guided experiments work without AI; the interface labels Guided mode and reports connection failures. Do not present the hosted prototype as a verified live AI demo.
+API secrets are server-only in ignored `.dev.vars` locally and Sites runtime secrets. GPT-Live-1 is verified connected, producing speech in both a real WebSocket session and the deployed WebRTC classroom. Project model allowlisting and a new key after that change resolved the access issue; no tier upgrade was needed. Astra still returns `model_not_found`, so teacher reasoning falls back to the already-allowed GPT-5.4-mini Responses API. Voice always remains GPT-Live-1. Optional Image 2.5 generation is not yet verified with the current allowlist.
 
 Microphone and camera require browser permission. Leaving the classroom stops tracks, closes voice, cancels animation and pending replies. Progress and captured images are session-only. The older Heat lab remains at `/heat` but is not part of the new navigation.
 
@@ -40,6 +40,11 @@ The browser uses GPT-Live-1 over WebRTC with the server-held Sites secret. It wa
 
 Official references: [WebRTC](https://developers.openai.com/api/docs/guides/voice-webrtc?api=live), [greeting before the caller speaks](https://developers.openai.com/api/docs/guides/live-conversations#greet-before-the-caller-speaks), [Live prompting](https://developers.openai.com/api/docs/guides/live-prompting), [model availability](https://developers.openai.com/api/docs/models/gpt-live-1).
 
-Actual verification: the configured key reaches `/v1/live/sessions` through both the direct WebSocket probe and the local browser WebRTC route, but OpenAI returns `model_not_found`: project `proj_y7OKgzOEI46t4EWgGcSWdCJ4` does not have access to `gpt-live-1`. The model docs list Tier 1 and above; no Tier 5 upgrade is required by those docs. A successful spoken session is **not** verified. No other model replaces GPT-Live-1. Platform permissions in personal Chrome remained on “Signing in…” during this check.
+Actual verification: GPT-Live-1 produced “Hi, I’m Miss Lumi! Can you try moving the ball into the light?” and non-silent PCM audio. The deployed browser connected with its microphone and returned live speech captions. The teacher endpoint returns real, grounded GPT-5.4-mini reasoning and a structured chalkboard sketch when helpful.
 
 Run `node scripts/probe-live.cjs` after project access changes. It prints only safe diagnostics; it never prints the key. Browser checks verified the first shadow challenge, its prediction, discovery feedback, and rejection of teacher movement during a prediction. `node --test tests/*.test.mjs` covers physics gates and voice cancellation/error handling.
+
+
+### Chalkboard
+
+Miss Lumi can draw when asked verbally, through a typed question, or using the small pen button. The reasoning model selects a relevant, physically grounded sketch and writes short custom labels. SVG chalk strokes and handwriting reveal progressively with a quiet synthesized chalk sound. The sound-effects mute includes chalk. The board is dismissible and clears before predictions; the server and client both reject new board content outside experimentation. Sketches are constrained to light rays, an opaque object and shadow, size, or a question diagram. Text is rendered as text, never HTML.

@@ -1,11 +1,12 @@
 import {useEffect,useRef,useState} from 'react';
 import {greetingInstruction,liveErrorMessage,withAbort} from '@/lib/live-protocol';
+import {BoardSketch} from '@/lib/teaching-board';
 import {shadowCommand} from '@/lib/shadows';
 export type TeacherAction={target:string;direction?:string;value?:number};
-export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>string){
+export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>string,draw:(b:BoardSketch)=>void){
  const [voice,setVoice]=useState<'off'|'connecting'|'on'>('off'),[caption,setCaption]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[speaking,setSpeaking]=useState(false),[muted,setMuted]=useState(false);
- const pc=useRef<RTCPeerConnection|null>(null),dc=useRef<RTCDataChannel|null>(null),mic=useRef<MediaStream|null>(null),audio=useRef<HTMLAudioElement|null>(null),meter=useRef<AudioContext|null>(null),meterFrame=useRef(0),startup=useRef<AbortController|null>(null),ready=useRef(false),epoch=useRef(0),history=useRef<{role:string;text:string}[]>([]),current=useRef(context),action=useRef(act),input=useRef(''),output=useRef(''),lastOutputEnd=useRef(0),requestId=useRef(0),teacherRequest=useRef<AbortController|null>(null);
- current.current=context;action.current=act;
+ const pc=useRef<RTCPeerConnection|null>(null),dc=useRef<RTCDataChannel|null>(null),mic=useRef<MediaStream|null>(null),audio=useRef<HTMLAudioElement|null>(null),meter=useRef<AudioContext|null>(null),meterFrame=useRef(0),startup=useRef<AbortController|null>(null),ready=useRef(false),epoch=useRef(0),history=useRef<{role:string;text:string}[]>([]),current=useRef(context),action=useRef(act),board=useRef(draw),input=useRef(''),output=useRef(''),lastOutputEnd=useRef(0),requestId=useRef(0),teacherRequest=useRef<AbortController|null>(null);
+ current.current=context;action.current=act;board.current=draw;
  function send(type:string,content:string,delegation_id:string|null=null,event_id=crypto.randomUUID()){
   if(ready.current&&dc.current?.readyState==='open')dc.current.send(JSON.stringify({type,event_id,delegation_id,content}));
   return event_id;
@@ -31,9 +32,9 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
   const deadline=setTimeout(()=>controller.abort(),45000);setBusy(true);
   try{
    const r=await fetch('/api/teacher',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,image,context:current.current,history:history.current.slice(-8)}),signal:controller.signal});
-   const d=await r.json() as {error?:string;text:string;action?:TeacherAction};
+   const d=await r.json() as {error?:string;text:string;action?:TeacherAction;board?:BoardSketch};
    if(!r.ok)throw Error(d.error);if(id!==requestId.current)return '';
-   let text=d.text;if(d.action)text+=` ${action.current(d.action)}`;
+   setNotice('');if(d.board&&current.current.phase==='play')board.current(d.board);let text=d.text;if(d.action)text+=` ${action.current(d.action)}`;
    history.current.push({role:'student',text:question},{role:'teacher',text});setCaption(text);return text;
   }catch{if(id===requestId.current)setNotice('The teacher’s thinking connection is unavailable. You can still try the experiment.');return '';}
   finally{clearTimeout(deadline);if(id===requestId.current)setBusy(false);}

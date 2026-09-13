@@ -14,8 +14,18 @@ export function useClassroomSound(){
    });
   }catch{/* A sound effect must never block the experiment. */}
  }
+ function chalk(){
+  if(!enabled)return;
+  try{const c=context.current??new AudioContext();context.current=c;void c.resume();
+   const buffer=c.createBuffer(1,c.sampleRate*1.8,c.sampleRate),samples=buffer.getChannelData(0);
+   for(let i=0;i<samples.length;i++)samples[i]=(Math.random()*2-1)*Math.pow(Math.sin(i/c.sampleRate*22),8);
+   const source=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();source.buffer=buffer;filter.type='bandpass';filter.frequency.value=1900;filter.Q.value=.65;
+   gain.gain.setValueAtTime(.022,c.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,c.currentTime+1.8);
+   source.connect(filter);filter.connect(gain);gain.connect(c.destination);source.start();source.stop(c.currentTime+1.8);
+  }catch{}
+ }
  function toggle(){if(enabled)void context.current?.suspend();setEnabled(v=>!v);}
  function stop(){void context.current?.suspend();}
  useEffect(()=>()=>{void context.current?.close();},[]);
- return {enabled,toggle,chime,stop};
+ return {enabled,toggle,chime,chalk,stop};
 }
