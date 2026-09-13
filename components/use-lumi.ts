@@ -45,8 +45,9 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
   if(dc.current?.readyState==='open')dc.current.send(JSON.stringify({type:next?'session.input_audio.mute':'session.input_audio.unmute'}));
   setMuted(next);
  }
- async function start(){
-  if(startup.current||voice!=='off'){stop();return;}
+ async function start(restart=false){
+  if(restart)stop();
+  if(!restart&&(startup.current||voice!=='off')){stop();return;}
   const id=++epoch.current,controller=new AbortController();startup.current=controller;
   const deadline=setTimeout(()=>controller.abort(new DOMException('Connection timed out','TimeoutError')),35000);
   setVoice('connecting');setNotice('');input.current='';output.current='';lastOutputEnd.current=0;
@@ -94,7 +95,7 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
      }
      if(v.type==='session.delegation.created'&&v.delegation?.target==='client'&&v.delegation?.id&&!seen.has(v.delegation.id)){
       seen.add(v.delegation.id);const q=input.current||'Help me with the current experiment.';input.current='';
-      const command=shadowCommand(q);
+      const command=current.current.topic==='shadows'?shadowCommand(q):null;
       const text=command?action.current(command):await ask(q);
       if(id===epoch.current)send('session.commentary.append',text||`The reasoning service is unavailable. Offer this safe experiment hint without claiming a result: ${String(current.current.hint||current.current.goal)}`,v.delegation.id);
      }

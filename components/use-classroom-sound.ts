@@ -5,7 +5,7 @@ export function useClassroomSound(){
  function chime(){
   if(!enabled)return;
   try{
-   const c=context.current??new AudioContext();context.current=c;void c.resume();
+   const c=context.current&&context.current.state!=='closed'?context.current:new AudioContext();context.current=c;void c.resume().catch(()=>{});
    [523.25,783.99,1046.5].forEach((frequency,i)=>{
     const tone=c.createOscillator(),gain=c.createGain(),t=c.currentTime+i*.15;
     tone.type='sine';tone.frequency.value=frequency;
@@ -16,7 +16,7 @@ export function useClassroomSound(){
  }
  function chalk(){
   if(!enabled)return;
-  try{const c=context.current??new AudioContext();context.current=c;void c.resume();
+  try{const c=context.current&&context.current.state!=='closed'?context.current:new AudioContext();context.current=c;void c.resume().catch(()=>{});
    const buffer=c.createBuffer(1,c.sampleRate*1.8,c.sampleRate),samples=buffer.getChannelData(0);
    for(let i=0;i<samples.length;i++)samples[i]=(Math.random()*2-1)*Math.pow(Math.sin(i/c.sampleRate*22),8);
    const source=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();source.buffer=buffer;filter.type='bandpass';filter.frequency.value=1900;filter.Q.value=.65;
@@ -24,8 +24,8 @@ export function useClassroomSound(){
    source.connect(filter);filter.connect(gain);gain.connect(c.destination);source.start();source.stop(c.currentTime+1.8);
   }catch{}
  }
- function toggle(){if(enabled)void context.current?.suspend();setEnabled(v=>!v);}
- function stop(){void context.current?.suspend();}
- useEffect(()=>()=>{void context.current?.close();},[]);
+ function toggle(){if(enabled)void context.current?.suspend().catch(()=>{});setEnabled(v=>!v);}
+ function stop(){void context.current?.suspend().catch(()=>{});}
+ useEffect(()=>()=>{const c=context.current;context.current=null;if(c&&c.state!=='closed')void c.close().catch(()=>{});},[]);
  return {enabled,toggle,chime,chalk,stop};
 }

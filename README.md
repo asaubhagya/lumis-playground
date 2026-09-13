@@ -4,7 +4,7 @@ Live public app: https://lumis-playground.asaubhagya.chatgpt.site
 
 90-second launch video: https://lumis-playground.asaubhagya.chatgpt.site/launch.mp4
 
-A desktop-first full-screen science classroom for ages 5–7. The demo is Light & Shadows (four discoveries). Forces & Motion remains in source for future exploration. Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
+A desktop-first full-screen science classroom for ages 5–7. Every entry draws from six curated experiences without repeating until the set is exhausted: Light & Shadows, Forces & Motion, Sound & Vibrations, Finding Balance, Equal Shares, and Secret Patterns. Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
 
 ## Play
 
@@ -33,7 +33,11 @@ Official API contracts: https://developers.openai.com/api/docs/guides/live-deleg
 
 Desktop refinement: entering attempts Live voice automatically. A connected session persists across discoveries and sends bounded proactive observation requests after completed experiments. Pointer light, ambient dust, gaze tracking, arrow-key shadow controls (last selected toy), and Space to push complement dragging. Reduced motion disables atmosphere movement. Offline status is explicit.
 
-Current demo scope: one homepage entry, ages 5–7, Light & Shadows only, taught by Miss Lumi. Motion remains in the source but is not offered in the demo.
+Current demo scope: one homepage entry, ages 5–7, six interactive SVG experiments, taught by Miss Lumi. The sparkle button opens another surprise. Only the remaining topic IDs are saved locally; learner conversations are not persisted.
+
+Equal Shares and Patterns open with a large freeform board. A sun/moon switch changes between chalkboard and whiteboard. The live teacher may explain other age-appropriate concepts on this board without changing the curated simulation. Shapes, arrows and words are generated as validated drawing data, never executable code. Predictions still pause controls and suppress answer-revealing drawings.
+
+Sound uses quiet 220/440 Hz tones with the same amplitude and a slow-motion waveform illustration. Balance models identical beads on equal-length arms. Shares compares equal parts of one fixed whole. Patterns checks the full alternating sequence, including mistakes and undo. New experiments remain deterministic; no claim is made that arbitrary simulations are generated live.
 
 
 ### Miss Lumi voice verification (13 September 2026)
