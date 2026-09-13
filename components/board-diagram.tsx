@@ -1,0 +1,10 @@
+import {Sun,Globe2,Moon,Cloud,CloudRain,Droplet,Leaf,Flower2,Trees,Mountain,Flame,Snowflake,Wind,Volume2,Flashlight,Magnet,Battery,Lightbulb,Brain,Monitor,Layers,Search,Check,HelpCircle,BookOpen,School,Users,Landmark,Crown,Clock,Map} from 'lucide-react';
+import type {BoardDiagram as Diagram,DiagramSymbol} from '@/lib/board-diagram';
+const icons={sun:Sun,earth:Globe2,moon:Moon,cloud:Cloud,rain:CloudRain,water:Droplet,leaf:Leaf,flower:Flower2,tree:Trees,mountain:Mountain,flame:Flame,snow:Snowflake,wind:Wind,sound:Volume2,light:Flashlight,magnet:Magnet,battery:Battery,bulb:Lightbulb,brain:Brain,computer:Monitor,cards:Layers,search:Search,check:Check,question:HelpCircle,book:BookOpen,school:School,people:Users,building:Landmark,crown:Crown,clock:Clock,map:Map};
+function Symbol({symbol}:{symbol:DiagramSymbol}){
+ if(symbol==='rays-direct'||symbol==='rays-slanted')return <svg viewBox="0 0 100 100" width="100%" height="100%" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M9 83H91" opacity=".5"/>{symbol==='rays-direct'?<><path d="M34 13V77m16-64v64m16-64v64"/><path d="m30 70 4 7 4-7m8 0 4 7 4-7m8 0 4 7 4-7"/><path d="M32 84H68" strokeWidth="6"/></>:<><path d="M2 39 40 77M14 27 64 77M26 15 88 77"/><path d="m33 75 7 2-2-7m19 5 7 2-2-7m19 5 7 2-2-7"/><path d="M38 84H90" strokeWidth="6"/></>}</svg>;
+ const Icon=icons[symbol];return <Icon size="100%" strokeWidth={1.35}/>;
+}
+export default function BoardDiagram({diagram}:{diagram:Diagram}){
+ return <div className={`clear-diagram ${diagram.layout}`} role="img" aria-label={diagram.items.map(i=>`${i.label}: ${i.detail}`).join('. ')}>{diagram.items.map((item,i)=><div className="diagram-column" key={i} style={{animationDelay:`${i*.32}s`}}><div className="diagram-symbol"><Symbol symbol={item.symbol}/></div><div className="diagram-label">{item.label}</div>{item.detail&&<div className="diagram-detail">{item.detail}</div>}{diagram.layout==='flow'&&i<diagram.items.length-1&&<div className="diagram-link" aria-hidden="true"><span>{diagram.links[i]||''}</span><svg viewBox="0 0 60 18"><path d="M1 9H55m-7-6 8 6-8 6"/></svg></div>}</div>)}</div>;
+}

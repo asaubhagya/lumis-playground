@@ -6,9 +6,10 @@ export const experiences:{id:Topic;name:string;opening:'canvas'|'board'}[]=[
  {id:'sound',name:'Pitch ≠ loudness',opening:'canvas'},{id:'balance',name:'The lever mystery',opening:'canvas'},
  {id:'shares',name:'Different fractions, same amount',opening:'canvas'},{id:'patterns',name:'Patterns that grow',opening:'canvas'},
 ];
+export const surpriseExperiences=experiences.filter(e=>['shadows','balance','sound'].includes(e.id));
 export const isDiscovery=(t:Topic):t is DiscoveryTopic=>['sound','balance','shares','patterns'].includes(t);
 export function nextExperience(remaining:unknown,last:unknown,random=Math.random):{topic:Topic;remaining:Topic[]}{
- const ids=experiences.map(e=>e.id);let bag=Array.isArray(remaining)?[...new Set(remaining.filter((x):x is Topic=>ids.includes(x)))]:[];
+ const ids=surpriseExperiences.map(e=>e.id);let bag=Array.isArray(remaining)?[...new Set(remaining.filter((x):x is Topic=>ids.includes(x)))]:[];
  if(!bag.length)bag=[...ids];const candidates=bag.filter(x=>x!==last),pool=candidates.length?candidates:bag;
  const topic=pool[Math.min(pool.length-1,Math.max(0,Math.floor(random()*pool.length)))];return {topic,remaining:bag.filter(x=>x!==topic)};
 }

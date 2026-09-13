@@ -4,7 +4,7 @@ Live public app: https://lumis-playground.asaubhagya.chatgpt.site
 
 90-second launch video: https://lumis-playground.asaubhagya.chatgpt.site/launch.mp4
 
-A responsive, immersive classroom for ages 8–12. The home screen offers Surprise classroom and Open classroom. Surprise classroom draws from six curated experiences without repeating until the set is exhausted: Light & Shadows, Forces & Motion, Sound & Vibrations, Finding Balance, Equal Shares, and Secret Patterns. Original inline SVG line-art teacher. On desktop the scene fills the viewport; on phones and tablets the experiment, board, and teacher stack with touch-sized controls. No progress bar, dashboard, or external character assets in the classroom.
+A responsive, immersive classroom for ages 8–12. The home screen offers Surprise classroom and Open classroom. Surprise classroom draws from three curated experiences without repeating until the set is exhausted: Light & Shadows, Finding Balance, and Sound & Vibrations. Original inline SVG line-art teacher. On desktop the scene fills the viewport; on phones and tablets the experiment, board, and teacher stack with touch-sized controls. No progress bar, dashboard, or external character assets in the classroom.
 
 ## Play
 
@@ -33,7 +33,7 @@ Official API contracts: https://developers.openai.com/api/docs/guides/live-deleg
 
 Desktop refinement: entering attempts Live voice automatically. A connected session persists across discoveries and sends bounded proactive observation requests after completed experiments. Pointer light, ambient dust, gaze tracking, arrow-key shadow controls (last selected toy), and Space to push complement dragging. Reduced motion disables atmosphere movement. Offline status is explicit.
 
-Current demo scope: one homepage entry, ages 8–12, six interactive SVG experiments, taught by Miss Lumi. The sparkle button opens another surprise. Only the remaining topic IDs are saved locally; learner conversations are not persisted.
+Current demo scope: one homepage entry, ages 8–12, three interactive experiments, taught by Miss Lumi. The sparkle button opens another surprise. Only the remaining topic IDs are saved locally; learner conversations are not persisted.
 
 Equal Shares and Patterns open with a large freeform board. A sun/moon switch changes between chalkboard and whiteboard. The live teacher may explain other age-appropriate concepts on this board without changing the curated simulation. Shapes, arrows and words are generated as validated drawing data, never executable code. Predictions still pause controls and suppress answer-revealing drawings.
 
@@ -61,4 +61,6 @@ Miss Lumi can draw when asked verbally, through a typed question, or using the s
 ## Current classroom experience
 Miss Lumi’s Classroom targets ages 8–12. Open classroom is the primary entry: GPT Live conversation, a dynamically composed explanation board, and optional GPT Image 2.5 companion illustrations. Pictures generate independently of the board; a failure leaves the explanation usable and offers a retry. The app labels images as simplified AI illustrations. The whiteboard has no student drawing feature and the main app has no camera controls. Typing remains a quiet voice fallback.
 
-Surprise me rotates six preset tutorials: shadow geometry; controlled force/mass/friction comparisons; independent pitch and amplitude; lever mass and distance; equivalent fractions; and growing triangular numbers. See docs/classroom-review.md for learning goals and references.
+Surprise me rotates three focused tutorials: shadow geometry, independent pitch and amplitude, and lever mass and distance. The lever uses Rapier 2D rigid bodies and a revolute joint; shadow and sound models use their appropriate geometry and wave equations. See docs/classroom-review.md for learning goals and references.
+
+Open classroom prefers dynamically chosen, spacious symbol diagrams with separate labels and arrows. Images are optional companions, requested only when they add something the board cannot convey.

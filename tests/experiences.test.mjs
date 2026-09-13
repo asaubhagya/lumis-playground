@@ -1,11 +1,11 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {nextExperience,experiences,discoveryReady,initialDiscovery,openingBoard,discoveryObservation} from '../lib/experiences.ts';
+import {nextExperience,experiences,surpriseExperiences,discoveryReady,initialDiscovery,openingBoard,discoveryObservation} from '../lib/experiences.ts';
 import {validateBoard} from '../lib/teaching-board.ts';
-test('surprise rotation visits all six before repeating and avoids the previous room at refill',()=>{
+test('surprise rotation visits the three curated rooms before repeating and avoids the previous room at refill',()=>{
  let remaining=[],last=null;const seen=[];
- for(let i=0;i<6;i++){const pick=nextExperience(remaining,last,()=>0);seen.push(pick.topic);remaining=pick.remaining;last=pick.topic;}
- assert.equal(new Set(seen).size,6);assert.notEqual(nextExperience([],last,()=>.999).topic,last);
+ for(let i=0;i<3;i++){const pick=nextExperience(remaining,last,()=>0);seen.push(pick.topic);remaining=pick.remaining;last=pick.topic;}
+ assert.equal(new Set(seen).size,3);assert.notEqual(nextExperience([],last,()=>.999).topic,last);
  const recovered=nextExperience(['not-a-topic'],null);assert.ok(experiences.some(e=>e.id===recovered.topic));
 });
 

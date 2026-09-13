@@ -1,5 +1,6 @@
 'use client';
 import {useState} from 'react';
+import BoardDiagram from './board-diagram';
 import {X,Sun,Moon} from 'lucide-react';
 import type {BoardSketch,ChalkMark} from '@/lib/teaching-board';
 const colors={chalk:'#d4e7d9',sage:'#9fc9b4',gold:'#e2cc96',rose:'#e7a0a5',orange:'#e7b07f',sky:'#93c7e5',violet:'#b5a1de'};
@@ -20,9 +21,9 @@ export default function TeachingBoard({sketch,onClose,light=true,onToggle,intera
  <button className="board-theme" aria-label={light?"Use chalkboard":"Use whiteboard"} onClick={onToggle}>{light?<Moon size={16}/>:<Sun size={16}/>}</button>
  <button className="board-close" onClick={onClose} aria-label="Clear board"><X size={15}/></button>
  <p className="board-title">{sketch.title}</p>
- <svg viewBox="0 0 440 260" role="img" aria-label={`${sketch.title}. ${sketch.note}`}>
+ {sketch.diagram?<BoardDiagram diagram={sketch.diagram}/>:<svg viewBox="0 0 440 260" role="img" aria-label={`${sketch.title}. ${sketch.note}`}>
  <g fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">{sketch.elements.map((mark,i)=><Mark light={light} key={i} mark={mark} index={i}/>)}</g>
- </svg><p className="board-note">{sketch.note}</p>
+ </svg>}<p className="board-note">{sketch.note}</p>
  {interactive&&challenge&&<div className="board-challenge"><p>{challenge.question}</p><div>{challenge.options.map((option,i)=><button key={option} disabled={chosen!==null||busy} aria-pressed={chosen===i} onClick={()=>{setChosen(i);onFeedback?.((i===challenge.correct?'You noticed it! ':'Let’s look together. ')+challenge.explanation);}}>{option}</button>)}</div>{chosen!==null&&<section role="status"><button disabled={busy} onClick={()=>onAnswer?.(`On the board "${sketch.title}", you asked "${challenge.question}". I chose "${challenge.options[chosen]}". Help me understand why and draw the next step.`)}>Explore why →</button></section>}</div>}
  <div className="chalk-rest"/>
  </aside>;

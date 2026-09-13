@@ -30,3 +30,19 @@ These informed the pedagogy; code, drawings and questions are original. No exter
 - Keep an explanation usable if image generation fails; explicit retry.
 - Illustration requests are cancelled on topic change/leave to prevent stale images.
 - Scientific relationships use deterministic math in preset tutorials; AI imagery is not an authoritative simulator.
+
+## September 13: three carefully selected surprises
+
+Research references (pedagogical inspiration; no third-party simulation code or art copied):
+- [PhET Balancing Act](https://github.com/phetsims/balancing-act): a dedicated balance simulation, GPL-3.0. The useful learning move is to compare mass AND distance, then predict a new configuration. We implement our own lever using Rapier rather than embed its application/dependency stack.
+- [IlliniOpenEdu PhysicsSims](https://github.com/IlliniOpenEdu/PhysicsSims): browser-based physics simulations; a useful reference catalogue for separating a physical model from its presentation. Candidates involving many simultaneous parameters are deferred for this age group.
+- [Rapier JavaScript joints](https://rapier.rs/docs/user_guides/javascript/joints/): the selected implementation uses a 2D revolute joint, real rigid-body dynamics, gravity, damping and joint travel stops. The beam has symmetric mass and ideal loads at marked positions. Stops limit travel, not the torque equation.
+- [Exploratorium Colored Shadows](https://www.exploratorium.edu/snacks/colored-shadows): prompts learners to change the light and notice what changes. Our simpler single-light experiment isolates position and distance before asking for a prediction.
+
+The active rotation is now only **Light & Shadows, Balance, Sound**. The old force/fraction/pattern definitions remain available internally for regression coverage, but do not appear in Surprise selection. Every active tutorial requires a meaningful experiment before a transfer question; rapid clicking cannot substitute for evidence.
+
+1. **Shadows:** move an object/light, compare size and direction, predict what removing the blocking object does. Geometric ray model; not a rigid-body simulation.
+2. **Balance:** find different mass-distance pairs that balance 3 kg at 2 m; predict a new pair. Rapier computes the displayed angle at a fixed 60 Hz. Equality of moments is checked independently for grading. This is an idealised lever, not a load-bearing engineering model.
+3. **Sound:** compare frequency while holding amplitude fixed, then amplitude while holding frequency fixed. Synthesised tones and a labelled slowed displacement sketch distinguish pitch from strength; the sketch is not the literal path of air particles.
+
+Open-class explanations prefer one clean diagram, comparison or short process. Labels have dedicated lanes beneath pictures; arrows occupy the space between columns. Images default to absent, and are requested only when they add a distinct useful representation.

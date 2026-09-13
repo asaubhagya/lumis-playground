@@ -1,17 +1,19 @@
+import {validateDiagram,type BoardDiagram} from './board-diagram.ts';
 export type ChalkTone='chalk'|'sage'|'gold'|'rose'|'orange'|'sky'|'violet';
 export type ChalkMark=
  | {type:'line'|'arrow'|'stroke';points:[number,number][];tone:ChalkTone}
  | {type:'ellipse';x:number;y:number;rx:number;ry:number;tone:ChalkTone}
  | {type:'text';x:number;y:number;text:string;size:number;tone:ChalkTone};
 export type BoardChallenge={question:string;options:string[];correct:number;explanation:string};
-export type BoardSketch={title:string;note:string;elements:ChalkMark[];challenge?:BoardChallenge};
+export type BoardSketch={title:string;note:string;elements:ChalkMark[];diagram?:BoardDiagram;challenge?:BoardChallenge};
 const number=(v:unknown,min:number,max:number)=>typeof v==='number'&&Number.isFinite(v)?Math.max(min,Math.min(max,v)):null;
 export function validateBoard(value:unknown,phase:unknown):BoardSketch|null{
  if(phase!=='play'||!value||typeof value!=='object')return null;
  const b=value as Record<string,unknown>;
- if(typeof b.title!=='string'||typeof b.note!=='string'||!Array.isArray(b.elements)||!b.elements.length||b.elements.length>40)return null;
+ const diagram=validateDiagram(b.diagram);
+ if(typeof b.title!=='string'||typeof b.note!=='string'||(!diagram&&(!Array.isArray(b.elements)||!b.elements.length||b.elements.length>40)))return null;
  const elements:ChalkMark[]=[];
- for(const raw of b.elements){
+ for(const raw of (diagram?[]:b.elements as unknown[])){
   if(!raw||typeof raw!=='object')return null;
   const m=raw as Record<string,unknown>,tone:ChalkTone=['sage','gold','rose','orange','sky','violet'].includes(String(m.tone))?m.tone as ChalkTone:'chalk';
   if(['line','arrow','stroke'].includes(String(m.type))){
@@ -37,7 +39,7 @@ export function validateBoard(value:unknown,phase:unknown):BoardSketch|null{
   if(free!==undefined)mark.y=free;
   labels.push(mark);
  }
- const result:BoardSketch={title:b.title.trim().slice(0,42),note:b.note.trim().slice(0,100),elements};
+ const result:BoardSketch={title:b.title.trim().slice(0,42),note:b.note.trim().slice(0,100),elements,...(diagram?{diagram}:{})};
  if(b.challenge&&typeof b.challenge==='object'){
   const c=b.challenge as Record<string,unknown>;
   if(typeof c.question==='string'&&c.question.trim()&&typeof c.explanation==='string'&&Array.isArray(c.options)&&c.options.length>=2&&c.options.length<=3&&c.options.every(o=>typeof o==='string'&&o.trim()&&o.length<=60)&&Number.isInteger(c.correct)&&Number(c.correct)>=0&&Number(c.correct)<c.options.length){
