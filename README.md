@@ -1,5 +1,9 @@
 # Lumi’s Playground
 
+Live public app: https://lumis-playground.asaubhagya.chatgpt.site
+
+90-second launch video: https://lumis-playground.asaubhagya.chatgpt.site/launch.mp4
+
 A desktop-first full-screen science classroom for ages 5–7. The demo is Light & Shadows (four discoveries). Forces & Motion remains in source for future exploration. Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
 
 ## Play
