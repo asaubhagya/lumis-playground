@@ -28,3 +28,5 @@ Microphone and camera require browser permission. Leaving the classroom stops tr
 Official API contracts: https://developers.openai.com/api/docs/guides/live-delegation and https://developers.openai.com/api/docs/guides/agents-api/quickstart.
 
 Desktop refinement: entering attempts Live voice automatically. A connected session persists across discoveries and sends bounded proactive observation requests after completed experiments. Pointer light, ambient dust, gaze tracking, arrow-key shadow controls (last selected toy), and Space to push complement dragging. Reduced motion disables atmosphere movement. Offline status is explicit.
+
+Current demo scope: one homepage entry, ages 5–7, Light & Shadows only, taught by Miss Lumi. Motion remains in the source but is not offered in the demo.

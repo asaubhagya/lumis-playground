@@ -1,0 +1,11 @@
+const fs = require('node:fs');
+const WebSocket = require('ws');
+const key = fs.readFileSync('.dev.vars', 'utf8').match(/^OPENAI_API_KEY=["']?([^\s"']+)/m)?.[1];
+if (!key) throw new Error('No local API key configured');
+const ws = new WebSocket('wss://api.openai.com/v1/live/sessions', {headers:{Authorization:`Bearer ${key}`}});
+const deadline = setTimeout(()=>{console.log('timeout');ws.terminate();},20000);
+ws.on('open',()=>ws.send(JSON.stringify({type:'session.start',session:{model:'gpt-live-1',instructions:'You are Miss Lumi, a concise classroom teacher.',audio:{format:{type:'audio/pcm',rate:24000},output:{voice:'marin'}},delegation:{type:'client'}}})));
+ws.on('unexpected-response',(_,r)=>{let body='';r.on('data',c=>body+=c);r.on('end',()=>{console.log(JSON.stringify({status:r.statusCode,body:body.replaceAll(key,'[REDACTED]').slice(0,2000)}));clearTimeout(deadline);ws.terminate();});});
+ws.on('message',raw=>{const e=JSON.parse(raw);console.log(JSON.stringify({type:e.type,error:e.error,model:e.session?.model}));if(e.type==='session.started'){ws.send(JSON.stringify({type:'session.close'}));}if(e.type==='session.closed'||e.type==='error'){clearTimeout(deadline);ws.close();}});
+ws.on('error',e=>{console.log(e.message.replaceAll(key,'[REDACTED]'));clearTimeout(deadline);});
+ws.on('close',()=>clearTimeout(deadline));
