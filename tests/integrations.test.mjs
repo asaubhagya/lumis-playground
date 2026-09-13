@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {consumeAgentStream,parseAgentJson} from '../lib/agent-stream.ts';
+import {requestedAction,validateAction} from '../lib/actions.ts';
+function stream(events,chunk=7){const bytes=new TextEncoder().encode(events.map(e=>'data: '+JSON.stringify(e)+'\n\n').join(''));let i=0;return new ReadableStream({pull(c){if(i===bytes.length)return c.close();c.enqueue(bytes.slice(i,i+chunk));i=Math.min(bytes.length,i+chunk);}});}
+const final={type:'agent.session.turn.item.done',session_id:'test-session',item:{role:'assistant',phase:'final_answer',content:[{type:'output_text',text:'{"text":"What do you predict?"}'}]}};
+test('agent parser accepts completed root output across partial SSE chunks',async()=>{const result=await consumeAgentStream(stream([{...final,item:{...final.item,phase:'commentary'}},final,{type:'agent.session.turn.completed',turn:{subagent_id:null}}]));assert.equal(parseAgentJson(result.text).text,'What do you predict?');assert.equal(result.sessionId,'test-session');});
+test('subagent completion cannot masquerade as completed learning plan',async()=>{await assert.rejects(consumeAgentStream(stream([final,{type:'agent.session.turn.completed',turn:{subagent_id:'child'}}])),/completed answer/);});
+test('failed or truncated streams are not success',async()=>{await assert.rejects(consumeAgentStream(stream([final])),/completed answer/);await assert.rejects(consumeAgentStream(stream([{type:'agent.session.turn.failed'}])),/could not finish/);});
+test('commands support controls but not grading or level skipping',()=>{assert.deepEqual(requestedAction('Please use wool'),{type:'set_material',material:'wool'});assert.deepEqual(requestedAction('Run the experiment'),{type:'run_experiment'});assert.deepEqual(requestedAction('Is wool the right answer?'),{type:'none'});assert.deepEqual(validateAction({type:'complete_level',level:3}),{type:'none'});assert.deepEqual(validateAction({type:'set_material',material:'unknown'}),{type:'none'});});
