@@ -1,37 +1,28 @@
-# Pip’s Playground
+# Pip’s Playground — Lumi’s classroom
 
-A Sites-hosted prototype for ages 5–10: an original toy robot, one continuous shadow workshop, and four connected discoveries. Entry points: `/` (Pip) and `/heat` (the earlier Heat Transfer lab, retained as an early module).
+A full-screen science classroom for ages 5–10. Two experiences: Light & Shadows (four discoveries) and Forces & Motion (three discoveries). Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
 
-## Play loop
+## Play
 
-Move the opaque ball or point lamp with drag, touch, or labelled arrow buttons. Match a target, predict a changed setup, and observe the result. Wrong predictions show the experiment and offer a retry. The final level combines size and position and asks the learner to explain the cause. No model can grade, reveal internal answers, or unlock a level through the exposed actions.
+`npm run dev` launches the Sites/Vinext app. Enter a classroom, drag the objects (or open Controls), experiment, then predict. Lumi gives compact, curated prompts. Wrong predictions show the outcome and return to experimentation. Discovery feedback is based on completed interactions and predictions, not a claim of expertise.
 
-The 5–7 band uses shorter instructions; 8–10 uses fuller prompts. The speaker uses device speech synthesis and is labelled read-aloud. Live voice is a separate GPT Live WebRTC connection. Progress is session-only and replay resets the journey.
+Motion compares fixed-duration pushes, mass, and surface friction. Each stage requires at least two trials that differ only in the relevant variable. The puck follows impulse F*dt and then constant frictional deceleration. Values and distances are normalized demonstration units, not a calibrated measurement. Shadow geometry uses an ideal point source and an opaque 2D silhouette; the on-screen ellipse is a display convention. Real light sources can create softer shadows.
 
-## Science model
+## AI and media
 
-`lib/shadows.ts` models a 2D cross-section of a point light, opaque circular silhouette and fixed screen. Projection uses similar triangles: magnification = light-to-screen distance / light-to-object distance. Shadow position is projected along straight rays through the object edges. The screen ellipse is a display convention for the side view. Real flashlights have extended sources and can form penumbras; this is not a calibrated physical simulation.
+- GPT Live (`gpt-live-1`): WebRTC microphone and audio; client delegation routes teaching to the Agents API. Experiment state is sent as quiet `session.thinking.append` updates with `delegation_id:null`. Spoken results use `session.commentary.append` with the delegation ID.
+- Agents API (`gpt-6-astra`): `/api/teacher` reasons over state, trial evidence and conversation. It can request one bounded control change when the learner asks for help or a demonstration. The client validates controls; the teacher cannot grade or advance. This is application tool control, not general operating-system computer use.
+- Astra vision: student can share an experiment SVG snapshot or a reviewed camera photo. GPT Live does not accept images directly; the vision backend returns observations. Camera preview stays local until Share with Lumi. No inference of emotion, attention or thoughts from faces.
+- Image API (`gpt-image-2.5-flare`): optional decorative discovery artwork after completion. It does not generate the physics simulation.
+- Device read-aloud is separately labelled and is not GPT Live.
+- WebMCP tools expose visible classroom state and bounded controls for compatible browsers.
 
-The four prerequisites are blocking light, distance and shadow size, light position and shadow direction, then transfer to a different arrangement. Discoveries record actions plus predictions, not proof of expertise. The final explanation is a recognition task, not free-response assessment. Useful reference: [PhET Bending Light](https://phet.colorado.edu/en/simulations/bending-light) and the existing primary science references under the parent `docs/research` folder.
+API secrets are server-only in ignored `.dev.vars` locally and Sites runtime secrets when configured. The existing key still returns `404 model_not_found` for Astra; real Live voice did not connect during this iteration. Sites has no entitled runtime key configured. Guided experiments work without AI; the interface labels Guided mode and reports connection failures. Do not present the hosted prototype as a verified live AI demo.
 
-## AI integration and current limitation
+Microphone and camera require browser permission. Leaving the classroom stops tracks, closes voice, cancels animation and pending replies. Progress and captured images are session-only. The older Heat lab remains at `/heat` but is not part of the new navigation.
 
-- `/api/plan`: Astra Agents API produces four age-adapted thinking prompts for the guide. The exact on-screen goals, sequence and gating remain curated and fixed.
-- `/api/coach`: Astra Agents API reasons over topic, challenge, scene, phase, attempts, and recent conversation. Photos first use Astra Responses for visual observations.
-- `/api/live`: GPT Live (`gpt-live-1`) with WebRTC and client delegation to the coach. Explicit movement commands use the same bounded controls as the UI.
-- `/api/image`: `gpt-image-2.5-flare` creates an optional decorative workshop poster. It never renders the physics model.
-- WebMCP: read workshop state or move a toy one step. No grading/advance tools.
+## Verification
 
-Existing server routes accept `topic: "shadows"`; omitted topic retains Heat Transfer compatibility. Secrets never belong in client code. `.dev.vars` is ignored.
+`node --test tests/*.test.mjs` validates stream handling, progression and physics relationships, including controlled motion comparisons. `./node_modules/.bin/tsc --noEmit` checks types. Build with the Sites hosting helper.
 
-**Verified 2026-09-13:** the local project key authenticates but Astra Agents calls still return `404 model_not_found`. Image generation was rechecked and returns `403 model_not_found`. Hosted runtime has no API secret configured. Thus hosted puzzles, original generated Pip artwork, device read-aloud and camera capture work independently; live coach, voice, photo understanding and runtime image generation are unavailable. No substitute model is silently used. To enable them, provide an appropriately entitled project key as the Sites `OPENAI_API_KEY` secret and redeploy, then verify each endpoint and live audio end-to-end.
-
-Camera permission is requested only from the completion activity. Capture is local; only “Discuss my photo” sends it for analysis. Camera/voice tracks close on cancellation, navigation, and stale connection completion. No learner uploads are persisted by the app.
-
-## Assets
-
-`public/pip-robot.png`: original generated artwork, created for this prototype. The workshop and scientific diagrams are deterministic SVG/CSS. `public/ice-lab.png` belongs to the earlier heat module. No Disney or other franchise assets were used.
-
-## Validation
-
-Run `node --experimental-strip-types --test tests/*.test.mjs` and `./node_modules/.bin/tsc --noEmit`. The Sites build and packaging helpers create the deployment. Tests cover projection relationships, reachable goals, invalid inputs, bounds, explicit-command parsing, heat gates and Agents stream completion. Browser validation covers the four-level journey, wrong-answer recovery, drag/tap controls, final explanation, responsive layout and unavailable-service messages.
+Official API contracts: https://developers.openai.com/api/docs/guides/live-delegation and https://developers.openai.com/api/docs/guides/agents-api/quickstart.
