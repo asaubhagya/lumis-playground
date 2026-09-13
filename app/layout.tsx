@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Lumi’s Playground — An interactive classroom",
-  description: "An immersive science classroom. Explore light, shadows, forces and motion with Lumi.",
+  description: "A classroom for tiny curious minds. Explore light and shadows with Miss Lumi in an interactive science playground for ages 5–7.",
   other: {
     "codex-preview": "development",
   },

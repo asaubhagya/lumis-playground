@@ -30,3 +30,16 @@ Official API contracts: https://developers.openai.com/api/docs/guides/live-deleg
 Desktop refinement: entering attempts Live voice automatically. A connected session persists across discoveries and sends bounded proactive observation requests after completed experiments. Pointer light, ambient dust, gaze tracking, arrow-key shadow controls (last selected toy), and Space to push complement dragging. Reduced motion disables atmosphere movement. Offline status is explicit.
 
 Current demo scope: one homepage entry, ages 5–7, Light & Shadows only, taught by Miss Lumi. Motion remains in the source but is not offered in the demo.
+
+
+### Miss Lumi voice verification (13 September 2026)
+
+The home invitation is “A classroom for tiny curious minds.” Entry starts a quiet, user-initiated Web Audio chime and a brief wake-up animation. Sound effects have a separate mute control. The live face animation measures returned audio, independently of decorative entry motion.
+
+The browser uses GPT-Live-1 over WebRTC with the server-held Sites secret. It waits for `session.started`, sends a fresh English greeting through `session.instructions.append`, and waits for the matching acknowledgment before prompting the welcome. Experiment state is sent through thinking updates; explicit movement requests execute a bounded app control and cannot grade or advance. Pending microphone requests time out and release streams granted after cancellation. Mic mute preserves the ongoing connection. Leaving stops tracks and closes the server session.
+
+Official references: [WebRTC](https://developers.openai.com/api/docs/guides/voice-webrtc?api=live), [greeting before the caller speaks](https://developers.openai.com/api/docs/guides/live-conversations#greet-before-the-caller-speaks), [Live prompting](https://developers.openai.com/api/docs/guides/live-prompting), [model availability](https://developers.openai.com/api/docs/models/gpt-live-1).
+
+Actual verification: the configured key reaches `/v1/live/sessions` through both the direct WebSocket probe and the local browser WebRTC route, but OpenAI returns `model_not_found`: project `proj_y7OKgzOEI46t4EWgGcSWdCJ4` does not have access to `gpt-live-1`. The model docs list Tier 1 and above; no Tier 5 upgrade is required by those docs. A successful spoken session is **not** verified. No other model replaces GPT-Live-1. Platform permissions in personal Chrome remained on “Signing in…” during this check.
+
+Run `node scripts/probe-live.cjs` after project access changes. It prints only safe diagnostics; it never prints the key. Browser checks verified the first shadow challenge, its prediction, discovery feedback, and rejection of teacher movement during a prediction. `node --test tests/*.test.mjs` covers physics gates and voice cancellation/error handling.
