@@ -20,3 +20,9 @@ test('open classroom challenges retain bounded choices and reject invalid answer
  }
  assert.equal(validateBoard({...sketch,challenge},'predict'),null);
 });
+
+test('generated text labels stay apart instead of overlapping',()=>{
+ const board=validateBoard({title:'Patterns',note:'Examples teach a pattern',elements:[{type:'text',x:280,y:70,text:'pattern',size:20},{type:'text',x:285,y:70,text:'new input',size:20}]},'play');
+ assert.ok(board);
+ assert.ok(Math.abs(board.elements[0].y-board.elements[1].y)>=24);
+});

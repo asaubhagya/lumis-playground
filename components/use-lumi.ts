@@ -1,11 +1,13 @@
 import {useEffect,useRef,useState} from 'react';
-import {greetingInstruction,liveErrorMessage,withAbort} from '@/lib/live-protocol';
+import {greetingInstruction,liveErrorMessage,liveContextSummary,withAbort} from '@/lib/live-protocol';
 import {BoardSketch} from '@/lib/teaching-board';
 import {shadowCommand} from '@/lib/shadows';
+type LessonVisual={prompt:string;caption:string;image?:string;error?:boolean};
 export type TeacherAction={target:string;direction?:string;value?:number};
 export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>string,draw:(b:BoardSketch)=>void){
  const [voice,setVoice]=useState<'off'|'connecting'|'on'>('off'),[caption,setCaption]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[speaking,setSpeaking]=useState(false),[muted,setMuted]=useState(false);
- const pc=useRef<RTCPeerConnection|null>(null),dc=useRef<RTCDataChannel|null>(null),mic=useRef<MediaStream|null>(null),audio=useRef<HTMLAudioElement|null>(null),meter=useRef<AudioContext|null>(null),meterFrame=useRef(0),startup=useRef<AbortController|null>(null),ready=useRef(false),epoch=useRef(0),history=useRef<{role:string;text:string}[]>([]),current=useRef(context),action=useRef(act),board=useRef(draw),input=useRef(''),output=useRef(''),lastOutputEnd=useRef(0),requestId=useRef(0),teacherRequest=useRef<AbortController|null>(null);
+ const [visual,setVisual]=useState<LessonVisual|null>(null),imageRequest=useRef<AbortController|null>(null),visualRef=useRef<LessonVisual|null>(null);
+ const pc=useRef<RTCPeerConnection|null>(null),dc=useRef<RTCDataChannel|null>(null),mic=useRef<MediaStream|null>(null),audio=useRef<HTMLAudioElement|null>(null),meter=useRef<AudioContext|null>(null),meterFrame=useRef(0),startup=useRef<AbortController|null>(null),ready=useRef(false),epoch=useRef(0),history=useRef<{role:string;text:string}[]>([]),current=useRef(context),action=useRef(act),board=useRef(draw),input=useRef(''),output=useRef(''),lastOutputEnd=useRef(0),lastTranscriptAt=useRef(0),captionLocked=useRef(false),requestId=useRef(0),teacherRequest=useRef<AbortController|null>(null);
  current.current=context;action.current=act;board.current=draw;
  function send(type:string,content:string,delegation_id:string|null=null,event_id=crypto.randomUUID()){
   if(ready.current&&dc.current?.readyState==='open')dc.current.send(JSON.stringify({type,event_id,delegation_id,content}));
@@ -27,16 +29,22 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
   cancelAnimationFrame(meterFrame.current);void meter.current?.close();meter.current=null;
   setVoice('off');setSpeaking(false);setMuted(false);
  }
+ async function renderVisual(spec:LessonVisual,id:number){
+  imageRequest.current?.abort();const controller=new AbortController();imageRequest.current=controller;visualRef.current=spec;setVisual(spec);
+  try{const response=await fetch('/api/image',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lesson:true,prompt:spec.prompt}),signal:controller.signal});const data=await response.json() as {image?:string};if(!response.ok||!data.image)throw Error();if(id===requestId.current&&!controller.signal.aborted)setVisual({...spec,image:data.image});}
+  catch{if(id===requestId.current&&!controller.signal.aborted)setVisual({...spec,error:true});}
+ }
+ function retryVisual(){if(visualRef.current)void renderVisual(visualRef.current,requestId.current);}
  async function ask(question:string,image?:string){
-  const id=++requestId.current;teacherRequest.current?.abort();const controller=new AbortController();teacherRequest.current=controller;
-  const deadline=setTimeout(()=>controller.abort(),60000);setBusy(true);setNotice('');
+  const id=++requestId.current;imageRequest.current?.abort();setVisual(null);visualRef.current=null;teacherRequest.current?.abort();const controller=new AbortController();teacherRequest.current=controller;
+  const deadline=setTimeout(()=>controller.abort(),60000);setBusy(true);setNotice('');captionLocked.current=false;
   try{
    const r=await fetch('/api/teacher',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,image,context:current.current,history:history.current.slice(-8)}),signal:controller.signal});
-   const d=await r.json() as {error?:string;text:string;action?:TeacherAction;board?:BoardSketch};
+   const d=await r.json() as {error?:string;text:string;action?:TeacherAction;board?:BoardSketch;visual?:LessonVisual};
    if(!r.ok)throw Error(d.error);if(id!==requestId.current)return '';
-   setNotice('');if(d.board&&current.current.phase==='play')board.current(d.board);let text=d.text;if(d.action)text+=` ${action.current(d.action)}`;
-   history.current.push({role:'student',text:question},{role:'teacher',text});setCaption(text);return text;
-  }catch{if(id===requestId.current)setNotice('The teacher’s thinking connection is unavailable. You can still try the experiment.');return '';}
+   setNotice('');if(d.visual&&current.current.mode==='open')void renderVisual(d.visual,id);if(d.board&&current.current.phase==='play')board.current(d.board);let text=d.text;if(d.action)text+=` ${action.current(d.action)}`;
+   captionLocked.current=true;history.current.push({role:'student',text:question},{role:'teacher',text});setCaption(text);return text;
+  }catch{if(id===requestId.current)setNotice('Lumi could not finish that explanation. Please ask again.');return '';}
   finally{clearTimeout(deadline);if(id===requestId.current)setBusy(false);}
  }
  function toggleMute(){
@@ -79,23 +87,23 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
      const v=JSON.parse(e.data);
      if(v.type==='session.started'){
       ready.current=true;setVoice('on');resolveStarted();
-      send('session.thinking.append',JSON.stringify(current.current));
+      send('session.thinking.append',liveContextSummary(current.current));
       greetingEvent=send('session.instructions.append',greetingInstruction(current.current.goal));
      }
-     if(v.type==='session.instructions.appended'&&v.client_event_id===greetingEvent){greetingEvent='';send('session.commentary.append','Begin the conversation now, following the welcome instructions.');}
+     if(v.type==='session.instructions.appended'&&v.client_event_id===greetingEvent){greetingEvent='';if(!history.current.length)send('session.commentary.append','Begin the conversation now, following the welcome instructions.');}
      if(v.type==='session.closed'){stop();return;}
-     if(v.type==='error'){setNotice(v.error?.code==='model_not_found'?'GPT-Live-1 is not enabled for this API project.':'Miss Lumi’s voice connection reported an error. Tap to retry.');stop();return;}
+     if(v.type==='error'){console.warn('Lumi Live error',v.error?.code,v.error?.message);setNotice(v.error?.code==='model_not_found'?'GPT-Live-1 is not enabled for this API project.':'Miss Lumi’s voice connection reported an error. Tap to retry.');stop();return;}
      if(v.type==='session.input_transcript.delta'){
-      input.current=(input.current+(typeof v.delta==='string'?v.delta:'')).slice(-2000);output.current='';
+      captionLocked.current=false;input.current=(input.current+(typeof v.delta==='string'?v.delta:'')).slice(-2000);
      }
      if(v.type==='session.output_transcript.delta'){
-      if(typeof v.start_ms==='number'&&v.start_ms-lastOutputEnd.current>1800)output.current='';
+      if(Date.now()-lastTranscriptAt.current>6000)output.current='';lastTranscriptAt.current=Date.now();
       lastOutputEnd.current=v.end_ms??lastOutputEnd.current;
-      output.current=(output.current+(typeof v.delta==='string'?v.delta:'')).slice(-700);setCaption(output.current);
+      output.current=(output.current+(typeof v.delta==='string'?v.delta:'')).slice(-700);if(!captionLocked.current)setCaption(output.current);
      }
      if(v.type==='session.delegation.created'&&v.delegation?.target==='client'&&v.delegation?.id&&!seen.has(v.delegation.id)){
       seen.add(v.delegation.id);const q=input.current||'Help me with the current experiment.';input.current='';
-      const command=current.current.topic==='shadows'?shadowCommand(q):null;
+      const command=current.current.mode!=='open'&&current.current.topic==='shadows'?shadowCommand(q):null;
       const text=command?action.current(command):await ask(q);
       if(id===epoch.current)send('session.commentary.append',text||`The reasoning service is unavailable. Offer this safe experiment hint without claiming a result: ${String(current.current.hint||current.current.goal)}`,v.delegation.id);
      }
@@ -119,9 +127,9 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
   }catch(e){if(id===epoch.current){stop();setNotice(liveErrorMessage(e));}}
   finally{clearTimeout(deadline);if(startup.current===controller)startup.current=null;}
  }
- function clear(){requestId.current++;teacherRequest.current?.abort();history.current=[];input.current='';output.current='';setCaption('');setBusy(false);setNotice('');}
- useEffect(()=>{const t=setTimeout(()=>send('session.thinking.append',JSON.stringify(context)),500);return()=>clearTimeout(t);},[JSON.stringify(context)]);
- useEffect(()=>()=>{requestId.current++;teacherRequest.current?.abort();stop();},[]);
+ function clear(){requestId.current++;imageRequest.current?.abort();setVisual(null);visualRef.current=null;teacherRequest.current?.abort();history.current=[];captionLocked.current=false;input.current='';output.current='';setCaption('');setBusy(false);setNotice('');}
+ useEffect(()=>{const t=setTimeout(()=>send('session.thinking.append',liveContextSummary(context)),500);return()=>clearTimeout(t);},[JSON.stringify(context)]);
+ useEffect(()=>()=>{requestId.current++;imageRequest.current?.abort();teacherRequest.current?.abort();stop();},[]);
  function resumeAudio(){void meter.current?.resume();void audio.current?.play().catch(()=>setNotice('Audio could not start. Try reconnecting voice.'));}
- return {resumeAudio,voice,caption,notice,busy,speaking,muted,toggleMute,start,stop,ask,clear,setCaption,setNotice,announce:(text:string)=>{output.current='';send('session.commentary.append',text);}};
+ return {visual,retryVisual,resumeAudio,voice,caption,notice,busy,speaking,muted,toggleMute,start,stop,ask,clear,setCaption,setNotice,announce:(text:string)=>{output.current='';send('session.commentary.append',text);}};
 }

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lumi’s Playground — An interactive classroom",
-  description: "A classroom for tiny curious minds. Explore light and shadows with Miss Lumi in an interactive science playground for ages 5–7.",
+  title: "Miss Lumi’s Classroom — Learn through curiosity",
+  description: "A live AI teacher for curious minds ages 8–12. Ask any question, explore illustrated explanations, and discover science and maths through interactive experiments.",
   other: {
     "codex-preview": "development",
   },

@@ -1,10 +1,10 @@
-# Lumi’s Playground
+# Miss Lumi’s Classroom
 
 Live public app: https://lumis-playground.asaubhagya.chatgpt.site
 
 90-second launch video: https://lumis-playground.asaubhagya.chatgpt.site/launch.mp4
 
-A responsive, immersive classroom for ages 5–7. The home screen offers Surprise classroom and Open classroom. Surprise classroom draws from six curated experiences without repeating until the set is exhausted: Light & Shadows, Forces & Motion, Sound & Vibrations, Finding Balance, Equal Shares, and Secret Patterns. Original inline SVG line-art teacher. On desktop the scene fills the viewport; on phones and tablets the experiment, board, and teacher stack with touch-sized controls. No progress bar, dashboard, or external character assets in the classroom.
+A responsive, immersive classroom for ages 8–12. The home screen offers Surprise classroom and Open classroom. Surprise classroom draws from six curated experiences without repeating until the set is exhausted: Light & Shadows, Forces & Motion, Sound & Vibrations, Finding Balance, Equal Shares, and Secret Patterns. Original inline SVG line-art teacher. On desktop the scene fills the viewport; on phones and tablets the experiment, board, and teacher stack with touch-sized controls. No progress bar, dashboard, or external character assets in the classroom.
 
 ## Play
 
@@ -16,14 +16,14 @@ Motion compares fixed-duration pushes, mass, and surface friction. Each stage re
 
 - GPT Live (`gpt-live-1`): WebRTC microphone and audio; client delegation routes teaching to the server reasoning backend. Experiment state is sent as quiet `session.thinking.append` updates with `delegation_id:null`. Spoken results use `session.commentary.append` with the delegation ID.
 - Agents API (`gpt-6-astra`): `/api/teacher` reasons over state, trial evidence and conversation. It can request one bounded control change when the learner asks for help or a demonstration. The client validates controls; the teacher cannot grade or advance. This is application tool control, not general operating-system computer use.
-- Vision (`gpt-5.4-mini`): student can share an experiment SVG snapshot or a reviewed camera photo. GPT Live does not accept images directly; the vision backend returns observations. Camera preview stays local until Share with Lumi. No inference of emotion, attention or thoughts from faces.
-- Image API (`gpt-image-2.5-flare`): optional decorative discovery artwork after completion. It does not generate the physics simulation.
+- Vision (`gpt-5.4-mini`): an explicit experiment snapshot can be reviewed. GPT Live does not accept images directly; the vision backend returns observations. The main classroom has no camera UI. No inference of emotion, attention or thoughts from faces.
+- Image API (`gpt-image-2.5-flare`): companion images generated for open classroom explanations, plus optional discovery artwork. It does not generate or grade the physics simulation.
 - Device read-aloud is separately labelled and is not GPT Live.
 - WebMCP tools expose visible classroom state and bounded controls for compatible browsers.
 
 API secrets are server-only in ignored `.dev.vars` locally and Sites runtime secrets. GPT-Live-1 is verified connected, producing speech in both a real WebSocket session and the deployed WebRTC classroom. Project model allowlisting and a new key after that change resolved the access issue; no tier upgrade was needed. Astra still returns `model_not_found`, so teacher reasoning falls back to the already-allowed GPT-5.4-mini Responses API. Voice always remains GPT-Live-1. Optional Image 2.5 generation is not yet verified with the current allowlist.
 
-Microphone and camera require browser permission. Leaving the classroom stops tracks, closes voice, cancels animation and pending replies. Progress and captured images are session-only. The older Heat lab remains at `/heat` but is not part of the new navigation.
+Microphone requires browser permission. Leaving the classroom stops tracks, closes voice, cancels animation and pending replies. Progress and captured images are session-only. The older Heat lab remains at `/heat` but is not part of the new navigation.
 
 ## Verification
 
@@ -33,7 +33,7 @@ Official API contracts: https://developers.openai.com/api/docs/guides/live-deleg
 
 Desktop refinement: entering attempts Live voice automatically. A connected session persists across discoveries and sends bounded proactive observation requests after completed experiments. Pointer light, ambient dust, gaze tracking, arrow-key shadow controls (last selected toy), and Space to push complement dragging. Reduced motion disables atmosphere movement. Offline status is explicit.
 
-Current demo scope: one homepage entry, ages 5–7, six interactive SVG experiments, taught by Miss Lumi. The sparkle button opens another surprise. Only the remaining topic IDs are saved locally; learner conversations are not persisted.
+Current demo scope: one homepage entry, ages 8–12, six interactive SVG experiments, taught by Miss Lumi. The sparkle button opens another surprise. Only the remaining topic IDs are saved locally; learner conversations are not persisted.
 
 Equal Shares and Patterns open with a large freeform board. A sun/moon switch changes between chalkboard and whiteboard. The live teacher may explain other age-appropriate concepts on this board without changing the curated simulation. Shapes, arrows and words are generated as validated drawing data, never executable code. Predictions still pause controls and suppress answer-revealing drawings.
 
@@ -57,8 +57,8 @@ Run `node scripts/probe-live.cjs` after project access changes. It prints only s
 
 Miss Lumi can draw when asked verbally, through a typed question, or using the small pen button. The reasoning model composes a fresh drawing from freeform strokes, arrows, ellipses and handwritten labels on a 440 × 260 canvas. There are no preset diagrams. SVG chalk strokes and handwriting reveal progressively with a quiet synthesized chalk sound. The sound-effects mute includes chalk. The board is dismissible and clears before predictions; the server and client both reject new board content outside experimentation. The renderer supports arbitrary foundational explanations; the teacher connects them to the current lesson. Server and client validate primitive types, finite coordinates, point counts and text lengths. No generated code, HTML, SVG markup or external assets execute. Text is rendered as text, never HTML.
 
-### Open classroom
+#
+## Current classroom experience
+Miss Lumi’s Classroom targets ages 8–12. Open classroom is the primary entry: GPT Live conversation, a dynamically composed explanation board, and optional GPT Image 2.5 companion illustrations. Pictures generate independently of the board; a failure leaves the explanation usable and offers a retry. The app labels images as simplified AI illustrations. The whiteboard has no student drawing feature and the main app has no camera controls. Typing remains a quiet voice fallback.
 
-A second home-screen entrance follows any age-appropriate question for ages 5–7, without returning the child to a preset experiment. Voice uses the existing GPT-Live-1 connection and delegates illustrated explanations to the teacher backend. The board expands into the main workspace, supports chalk/whiteboard styles, and can include a validated 2–3 choice activity with immediate explanatory feedback. Children can add bounded freehand strokes locally and explicitly choose Show Lumi to share the board image for visual feedback. Leaving ends the microphone session; no student drawings or questions are stored in localStorage.
-
-The six simulations remain deterministic. Open-class drawings and questions are AI generated, validated as data, and may need teacher review for accuracy. This mode does not generate or execute arbitrary interactive code. Meaningful color is available for visual concepts such as rainbows; the surrounding interface remains restrained.
+Surprise me rotates six preset tutorials: shadow geometry; controlled force/mass/friction comparisons; independent pitch and amplitude; lever mass and distance; equivalent fractions; and growing triangular numbers. See docs/classroom-review.md for learning goals and references.
