@@ -1,39 +1,37 @@
-# Aha! — ten-minute science lab
+# Pip’s Playground
 
-Browser prototype for ages 5–10. Heat & temperature is the complete module. Light & shadows is visibly marked as the next module, not a working game.
+A Sites-hosted prototype for ages 5–10: an original toy robot, one continuous shadow workshop, and four connected discoveries. Entry points: `/` (Pip) and `/heat` (the earlier Heat Transfer lab, retained as an early module).
 
-## Run
+## Play loop
 
-Run `npm run dev` from this directory. The Sites/Vinext starter reads `OPENAI_API_KEY` from ignored `.dev.vars`. Never commit that file. Configure the same key as a secret in Sites for deployment. `npm run build` produces the Cloudflare Worker application.
+Move the opaque ball or point lamp with drag, touch, or labelled arrow buttons. Match a target, predict a changed setup, and observe the result. Wrong predictions show the experiment and offer a retry. The final level combines size and position and asks the learner to explain the cause. No model can grade, reveal internal answers, or unlock a level through the exposed actions.
 
-## Learning contract
+The 5–7 band uses shorter instructions; 8–10 uses fuller prompts. The speaker uses device speech synthesis and is labelled read-aloud. Live voice is a separate GPT Live WebRTC connection. Progress is session-only and replay resets the journey.
 
-The four required discoveries are heat direction, insulation, transfer to a warm drink, and an everyday-object application. Predictions unlock levels only after app-side checks. The insulation level also requires running the successful experiment. Incorrect attempts trigger progressively more concrete hints. The discovery map records completed concepts and observed answers; it does not certify mastery.
+## Science model
 
-The ice simulation is qualitative and accelerated. Displayed percentages are illustrative model output, not experimentally measured melting rates. It fixes cube amount and environment, comparing a thick dry wool wrap, no wrap, and a thin contacting metal shell. Do not generalize the metal ranking to arbitrary containers or thicknesses.
+`lib/shadows.ts` models a 2D cross-section of a point light, opaque circular silhouette and fixed screen. Projection uses similar triangles: magnification = light-to-screen distance / light-to-object distance. Shadow position is projected along straight rays through the object edges. The screen ellipse is a display convention for the side view. Real flashlights have extended sources and can form penumbras; this is not a calibrated physical simulation.
 
-## API integration
+The four prerequisites are blocking light, distance and shadow size, light position and shadow direction, then transfer to a different arrangement. Discoveries record actions plus predictions, not proof of expertise. The final explanation is a recognition task, not free-response assessment. Useful reference: [PhET Bending Light](https://phet.colorado.edu/en/simulations/bending-light) and the existing primary science references under the parent `docs/research` folder.
 
-- `/api/plan`: Agents API beta, `gpt-6-astra`, creates and validates four short age-adjusted map prompts. Uses completed final-answer item events plus root turn completion. Curated map remains available on failure.
-- `/api/coach`: Agents API, `gpt-6-astra`, short grounded hints adapted to age, attempts and experiment state; optional camera observations use Astra vision through Responses API first. Learner answers never control grading through the model.
-- `/api/live`: GPT-Live-1 WebRTC session, client delegation back to the Astra coach. Voice delegates to the guide and returns validated experiment commands. Typed commands use the same command handler. The learner must still submit predictions. This is not autonomous computer use.
-- `/api/image`: GPT Image 2.5 Flare, creates an everyday-object illustration on request. Simulation geometry remains deterministic.
-- `/api/status`: exposes configuration presence, never key values.
+## AI integration and current limitation
 
-WebMCP tools expose read state, configure material, and run experiment. They cannot submit answers or unlock levels. These are structured browser actions, not a claim that the runtime uses a computer-use model.
+- `/api/plan`: Astra Agents API produces four age-adapted thinking prompts for the guide. The exact on-screen goals, sequence and gating remain curated and fixed.
+- `/api/coach`: Astra Agents API reasons over topic, challenge, scene, phase, attempts, and recent conversation. Photos first use Astra Responses for visual observations.
+- `/api/live`: GPT Live (`gpt-live-1`) with WebRTC and client delegation to the coach. Explicit movement commands use the same bounded controls as the UI.
+- `/api/image`: `gpt-image-2.5-flare` creates an optional decorative workshop poster. It never renders the physics model.
+- WebMCP: read workshop state or move a toy one step. No grading/advance tools.
 
-## Verification and current limitation
+Existing server routes accept `topic: "shadows"`; omitted topic retains Heat Transfer compatibility. Secrets never belong in client code. `.dev.vars` is ignored.
 
-TypeScript check and seven learning/simulation/agent-stream/action contract tests pass. Browser checks cover a wrong prediction, success gating, all four levels, final recap, mouse-drawn prediction, mobile layout and age mode, and WebMCP valid/invalid input. Camera reached a review state; no captured personal photo was sent for testing. Voice playback is not verified.
+**Verified 2026-09-13:** the local project key authenticates but Astra Agents calls still return `404 model_not_found`. Image generation was rechecked and returns `403 model_not_found`. Hosted runtime has no API secret configured. Thus hosted puzzles, original generated Pip artwork, device read-aloud and camera capture work independently; live coach, voice, photo understanding and runtime image generation are unavailable. No substitute model is silently used. To enable them, provide an appropriately entitled project key as the Sites `OPENAI_API_KEY` secret and redeploy, then verify each endpoint and live audio end-to-end.
 
-On 2026-09-13 a newly created key in the selected Personal / Default project authenticated but had no access to `gpt-6-astra`, `gpt-live-1`, or `gpt-image-2.5-flare`. Astra and Image requests returned 403 model_not_found; Agents returned 404 model_not_found. Available model IDs were older GPT models. Billing credits alone did not establish model access. The exact requested models are retained; no silent substitution. API end-to-end success remains blocked on the hackathon project/model entitlement.
+Camera permission is requested only from the completion activity. Capture is local; only “Discuss my photo” sends it for analysis. Camera/voice tracks close on cancellation, navigation, and stale connection completion. No learner uploads are persisted by the app.
 
 ## Assets
 
-`public/ice-lab.png` was generated with the built-in Image Gen tool. Prompt: translucent blue ice cube on an orange circular laboratory tray, condensation droplets, deep navy background, tactile glass/clay 3D editorial style, square composition, no text, people, or characters. The generated image is topic art, not scientific measurement.
+`public/pip-robot.png`: original generated artwork, created for this prototype. The workshop and scientific diagrams are deterministic SVG/CSS. `public/ice-lab.png` belongs to the earlier heat module. No Disney or other franchise assets were used.
 
-Design references and API source links are in the parent repository's `docs/research/` folder.
+## Validation
 
-## Immersive interface revision
-
-The experiment now occupies a full-screen dark scene with a restrained blue/silver palette. The guide is an on-demand floating overlay. Typed “Use wool” and “Run the experiment” commands were verified against visible browser state. The hosted preview has no API secret configured; the existing local key lacks target model access. API success, voice playback and cloud camera understanding remain unverified.
+Run `node --experimental-strip-types --test tests/*.test.mjs` and `./node_modules/.bin/tsc --noEmit`. The Sites build and packaging helpers create the deployment. Tests cover projection relationships, reachable goals, invalid inputs, bounds, explicit-command parsing, heat gates and Agents stream completion. Browser validation covers the four-level journey, wrong-answer recovery, drag/tap controls, final explanation, responsive layout and unavailable-service messages.
