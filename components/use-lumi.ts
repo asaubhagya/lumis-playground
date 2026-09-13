@@ -29,7 +29,7 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
  }
  async function ask(question:string,image?:string){
   const id=++requestId.current;teacherRequest.current?.abort();const controller=new AbortController();teacherRequest.current=controller;
-  const deadline=setTimeout(()=>controller.abort(),45000);setBusy(true);
+  const deadline=setTimeout(()=>controller.abort(),60000);setBusy(true);setNotice('');
   try{
    const r=await fetch('/api/teacher',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,image,context:current.current,history:history.current.slice(-8)}),signal:controller.signal});
    const d=await r.json() as {error?:string;text:string;action?:TeacherAction;board?:BoardSketch};
@@ -123,5 +123,5 @@ export function useLumi(context:Record<string,unknown>,act:(a:TeacherAction)=>st
  useEffect(()=>{const t=setTimeout(()=>send('session.thinking.append',JSON.stringify(context)),500);return()=>clearTimeout(t);},[JSON.stringify(context)]);
  useEffect(()=>()=>{requestId.current++;teacherRequest.current?.abort();stop();},[]);
  function resumeAudio(){void meter.current?.resume();void audio.current?.play().catch(()=>setNotice('Audio could not start. Try reconnecting voice.'));}
- return {resumeAudio,voice,caption,notice,busy,speaking,muted,toggleMute,start,stop,ask,clear,setCaption,setNotice,announce:(text:string)=>send('session.commentary.append',text)};
+ return {resumeAudio,voice,caption,notice,busy,speaking,muted,toggleMute,start,stop,ask,clear,setCaption,setNotice,announce:(text:string)=>{output.current='';send('session.commentary.append',text);}};
 }

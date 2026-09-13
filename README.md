@@ -4,7 +4,7 @@ Live public app: https://lumis-playground.asaubhagya.chatgpt.site
 
 90-second launch video: https://lumis-playground.asaubhagya.chatgpt.site/launch.mp4
 
-A desktop-first full-screen science classroom for ages 5–7. Every entry draws from six curated experiences without repeating until the set is exhausted: Light & Shadows, Forces & Motion, Sound & Vibrations, Finding Balance, Equal Shares, and Secret Patterns. Original inline SVG line-art teacher. No progress bar, dashboard, or external character assets in the classroom.
+A responsive, immersive classroom for ages 5–7. The home screen offers Surprise classroom and Open classroom. Surprise classroom draws from six curated experiences without repeating until the set is exhausted: Light & Shadows, Forces & Motion, Sound & Vibrations, Finding Balance, Equal Shares, and Secret Patterns. Original inline SVG line-art teacher. On desktop the scene fills the viewport; on phones and tablets the experiment, board, and teacher stack with touch-sized controls. No progress bar, dashboard, or external character assets in the classroom.
 
 ## Play
 
@@ -56,3 +56,9 @@ Run `node scripts/probe-live.cjs` after project access changes. It prints only s
 ### Chalkboard
 
 Miss Lumi can draw when asked verbally, through a typed question, or using the small pen button. The reasoning model composes a fresh drawing from freeform strokes, arrows, ellipses and handwritten labels on a 440 × 260 canvas. There are no preset diagrams. SVG chalk strokes and handwriting reveal progressively with a quiet synthesized chalk sound. The sound-effects mute includes chalk. The board is dismissible and clears before predictions; the server and client both reject new board content outside experimentation. The renderer supports arbitrary foundational explanations; the teacher connects them to the current lesson. Server and client validate primitive types, finite coordinates, point counts and text lengths. No generated code, HTML, SVG markup or external assets execute. Text is rendered as text, never HTML.
+
+### Open classroom
+
+A second home-screen entrance follows any age-appropriate question for ages 5–7, without returning the child to a preset experiment. Voice uses the existing GPT-Live-1 connection and delegates illustrated explanations to the teacher backend. The board expands into the main workspace, supports chalk/whiteboard styles, and can include a validated 2–3 choice activity with immediate explanatory feedback. Children can add bounded freehand strokes locally and explicitly choose Show Lumi to share the board image for visual feedback. Leaving ends the microphone session; no student drawings or questions are stored in localStorage.
+
+The six simulations remain deterministic. Open-class drawings and questions are AI generated, validated as data, and may need teacher review for accuracy. This mode does not generate or execute arbitrary interactive code. Meaningful color is available for visual concepts such as rainbows; the surrounding interface remains restrained.

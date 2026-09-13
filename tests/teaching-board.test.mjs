@@ -12,3 +12,11 @@ test('board rejects executable markup, invalid geometry and unbounded payloads',
  assert.deepEqual(bounded.elements[0],{type:'stroke',points:[[8,252],[432,8]],tone:'chalk'});
  assert.equal(validateBoard({...sketch,note:'a'.repeat(900)},'play').note.length,100);
 });
+test('open classroom challenges retain bounded choices and reject invalid answer keys',()=>{
+ const challenge={question:'Which needs light?',options:['A plant','A rock'],correct:0,explanation:'Plants use light energy to make food.'};
+ assert.deepEqual(validateBoard({...sketch,challenge},'play').challenge,challenge);
+ for(const bad of [{...challenge,correct:2},{...challenge,correct:0.5},{...challenge,options:['one']},{...challenge,options:['', 'two']},{...challenge,options:['a'.repeat(61),'two']}]){
+  assert.equal(validateBoard({...sketch,challenge:bad},'play').challenge,undefined);
+ }
+ assert.equal(validateBoard({...sketch,challenge},'predict'),null);
+});
